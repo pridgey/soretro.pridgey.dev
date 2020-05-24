@@ -21,6 +21,9 @@
   let currentRetroItem = "";
   let retroItems = [];
 
+  // Websocket
+  let socket = "";
+
   // Get the session if it exists, create it if it doesn't
   let sessionId = FindParamByKey("si");
   if (!sessionId) {
@@ -28,28 +31,46 @@
     window.location.search = `?si=${CreateID()}`;
   } else {
     // Have a session
-    const socket = new WebSocket(process.env.SOCKET_URL);
+    socket = new WebSocket(process.env.SOCKET_URL);
+
+    // On connect, ask for any existing items
+    socket.addEventListener("open", event => {
+      const data = {
+        id: sessionId,
+        payload: "",
+        request: "initial"
+      };
+      socket.send(JSON.stringify(data));
+    });
 
     // Listen for messages
     socket.addEventListener("message", event => {
       const socketData = JSON.parse(event.data);
       if (socketData.id === sessionId) {
         // This relates to us
-        if (socketData.payload !== retroItems) {
-          // We have new stuff
-          retroItems = socketData.payload;
+        if (socketData.request === "initial" && retroItems.length > 0) {
+          // A client joined the session, send them what we have
+          updateSession();
+        } else {
+          // Must be receiving information about our session
+          if (socketData.payload !== retroItems) {
+            // We have new stuff
+            retroItems = socketData.payload;
+          }
         }
       }
     });
+  }
 
-    const updateSession = () => {
+  const updateSession = () => {
+    if (socket) {
       const data = {
         id: sessionId,
         payload: retroItems
       };
-      socket.send(data);
-    };
-  }
+      socket.send(JSON.stringify(data));
+    }
+  };
 
   const handleInviteClick = () => {
     CopyToClipboard(window.location.href);
@@ -123,6 +144,7 @@
           retroItems = [...retroItems, { text: currentRetroItem, scale: (input.x / window.innerWidth) * 100 }];
           currentRetroItem = '';
           input = { ...input, show: false };
+          updateSession();
         }} />
     </div>
     <RetroCards Columns={6} RetroItems={retroItems} />
