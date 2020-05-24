@@ -31,7 +31,9 @@
     window.location.search = `?si=${CreateID()}`;
   } else {
     // Have a session
-    socket = new WebSocket(process.env.SOCKET_URL);
+    if (process.env.SOCKET_URL) {
+      socket = new WebSocket(process.env.SOCKET_URL);
+    }
 
     // On connect, ask for any existing items
     socket.addEventListener("open", event => {
