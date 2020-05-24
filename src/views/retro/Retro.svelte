@@ -33,35 +33,35 @@
     // Have a session
     if (process.env.SOCKET_URL) {
       socket = new WebSocket(process.env.SOCKET_URL);
-    }
 
-    // On connect, ask for any existing items
-    socket.addEventListener("open", event => {
-      const data = {
-        id: sessionId,
-        payload: "",
-        request: "initial"
-      };
-      socket.send(JSON.stringify(data));
-    });
+      // On connect, ask for any existing items
+      socket.addEventListener("open", event => {
+        const data = {
+          id: sessionId,
+          payload: "",
+          request: "initial"
+        };
+        socket.send(JSON.stringify(data));
+      });
 
-    // Listen for messages
-    socket.addEventListener("message", event => {
-      const socketData = JSON.parse(event.data);
-      if (socketData.id === sessionId) {
-        // This relates to us
-        if (socketData.request === "initial" && retroItems.length > 0) {
-          // A client joined the session, send them what we have
-          updateSession();
-        } else {
-          // Must be receiving information about our session
-          if (socketData.payload !== retroItems) {
-            // We have new stuff
-            retroItems = socketData.payload;
+      // Listen for messages
+      socket.addEventListener("message", event => {
+        const socketData = JSON.parse(event.data);
+        if (socketData.id === sessionId) {
+          // This relates to us
+          if (socketData.request === "initial" && retroItems.length > 0) {
+            // A client joined the session, send them what we have
+            updateSession();
+          } else {
+            // Must be receiving information about our session
+            if (socketData.payload !== retroItems) {
+              // We have new stuff
+              retroItems = socketData.payload;
+            }
           }
         }
-      }
-    });
+      });
+    }
   }
 
   const updateSession = () => {
