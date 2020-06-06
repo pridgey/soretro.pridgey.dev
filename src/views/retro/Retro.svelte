@@ -10,16 +10,12 @@
   import Slider from "./../../components/Slider.svelte";
   import Input from "./../../components/Input.svelte";
   import RetroCards from "./../../components/RetroCards.svelte";
+  import Card from "./../../components/Card.svelte";
 
   // State
   let inviteButtonText = "Invite To Session";
-  let input = {
-    x: -1000,
-    y: -1000,
-    show: false
-  };
   let currentRetroItem = "";
-  let retroItems = [];
+  let retroItemsArray = [];
 
   // Websocket
   let socket = "";
@@ -31,36 +27,55 @@
     window.location.search = `?si=${CreateID()}`;
   } else {
     // Have a session
-    if (process.env.SOCKET_URL) {
-      socket = new WebSocket(process.env.SOCKET_URL);
+    const socketUrl = process.env.SOCKET_URL || "ws://localhost:5500";
+    if (socketUrl) {
+      let connectionAttempts = 1;
 
-      // On connect, ask for any existing items
-      socket.addEventListener("open", event => {
-        const data = {
-          id: sessionId,
-          payload: "",
-          request: "initial"
-        };
-        socket.send(JSON.stringify(data));
-      });
+      const connectToSocket = () => {
+        socket = new WebSocket(socketUrl);
 
-      // Listen for messages
-      socket.addEventListener("message", event => {
-        const socketData = JSON.parse(event.data);
-        if (socketData.id === sessionId) {
-          // This relates to us
-          if (socketData.request === "initial" && retroItems.length > 0) {
-            // A client joined the session, send them what we have
-            updateSession();
-          } else {
-            // Must be receiving information about our session
-            if (socketData.payload !== retroItems) {
-              // We have new stuff
-              retroItems = socketData.payload;
+        // On connect, ask for any existing items
+        socket.addEventListener("open", event => {
+          // Reset connectionAttempts
+          connectionAttempts = 1;
+
+          // Request any data other clients might have
+          const data = {
+            id: sessionId,
+            payload: "",
+            request: "initial"
+          };
+          socket.send(JSON.stringify(data));
+        });
+
+        // On close try reconnecting
+        socket.addEventListener("close", event => {
+          setTimeout(() => {
+            connectToSocket();
+          }, 1000 * connectionAttempts);
+        });
+
+        // Listen for messages
+        socket.addEventListener("message", event => {
+          const socketData = JSON.parse(event.data);
+          if (socketData.id === sessionId) {
+            // This relates to us
+            if (socketData.request === "initial" && retroItems.length > 0) {
+              // A client joined the session, send them what we have
+              updateSession();
+            } else {
+              // Must be receiving information about our session
+              if (socketData.payload !== retroItems) {
+                // We have new stuff
+                retroItems = socketData.payload;
+              }
             }
           }
-        }
-      });
+        });
+      };
+
+      // Do it!
+      connectToSocket();
     }
   }
 
@@ -68,7 +83,7 @@
     if (socket) {
       const data = {
         id: sessionId,
-        payload: retroItems
+        payload: retroItemsArray
       };
       socket.send(JSON.stringify(data));
     }
@@ -81,6 +96,10 @@
       inviteButtonText = "Invite To Session";
     }, 2500);
   };
+
+  function handleSubmit(newRetroItem) {
+    retroItemsArray = [...retroItemsArray, newRetroItem];
+  }
 </script>
 
 <style>
@@ -105,13 +124,14 @@
     font-family: "Mukta", sans-serif;
     font-size: 20px;
     color: var(--color);
+    text-align: left;
+    margin-bottom: 5px;
+    width: 90%;
   }
 
-  #inputPlacement {
-    position: absolute;
-    left: var(--x);
-    top: var(--y);
-    display: var(--show);
+  #cardcontainer {
+    position: relative;
+    width: 90%;
   }
 </style>
 
@@ -123,32 +143,27 @@
       justifyContent="space-between"
       height="70px"
       padding="15px 40px">
-      <h1 style="--color:{Theme.colors.black}">So Retro</h1>
+      <FlexContainer
+        width="205px"
+        alignItems="center"
+        justifyContent="space-between"
+        padding="0px">
+        <img src="/favicon.svg" alt="So Retro" height="100%" />
+        <h1 style="--color:{Theme.colors.black}">So Retro</h1>
+      </FlexContainer>
       <Button OnClick={handleInviteClick}>{inviteButtonText}</Button>
     </FlexContainer>
-    <h2 style="--color:{Theme.colors.black}">
-      Click along the range to add a retro item
-    </h2>
-    <Slider
-      OnClick={event => {
-        const top = event.target.getBoundingClientRect().top + event.target.getBoundingClientRect().height + 15;
-        input = { x: event.offsetX + 50, y: top, show: true };
-      }} />
-    <div
-      id="inputPlacement"
-      style="--x:{input.x}px; --y:{input.y}px; --show:{input.show ? 'block' : 'none'}">
-      <Input
-        Placeholder="Enter Retro Item"
-        OnChange={event => {
-          currentRetroItem = event.target.value;
-        }}
-        OnEnter={() => {
-          retroItems = [...retroItems, { text: currentRetroItem, scale: (input.x / window.innerWidth) * 100 }];
-          currentRetroItem = '';
-          input = { ...input, show: false };
-          updateSession();
-        }} />
+    <h2 style="--color:{Theme.colors.black}">ADD A RETRO ITEM:</h2>
+    <Slider OnSubmit={handleSubmit} />
+    <div id="cardcontainer">
+      {#each retroItemsArray as item}
+        <Card
+          text={item.itemText}
+          percent={item.percentage}
+          width={document
+            .getElementById('cardcontainer')
+            .getBoundingClientRect().width} />
+      {/each}
     </div>
-    <RetroCards Columns={6} RetroItems={retroItems} />
   </FlexContainer>
 </main>

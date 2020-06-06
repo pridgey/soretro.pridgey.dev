@@ -31,6 +31,7 @@ export default {
         env: {
           isProd: production,
           ...config().parsed,
+          SOCKET_URL: process.env.SOCKET_URL,
         },
       }),
     }),
