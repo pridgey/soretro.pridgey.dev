@@ -4,10 +4,7 @@
 
   // State
   let hoverX = -1000;
-  let highlightColor = {
-    green: 15,
-    red: 15
-  };
+  let hue = 176;
   let sliderInnerText = "How positive is this item?";
   let retroItem = {
     itemText: "",
@@ -22,10 +19,7 @@
     // reset stuff
     hoverX = -1000;
     sliderInnerText = "How positive is this item?";
-    highlightColor = {
-      green: 15,
-      red: 15
-    };
+    hue = 176;
   }
 
   function handleMouseOver(event) {
@@ -38,21 +32,19 @@
       retroItem.percentage = percentage;
 
       // Calculate highlightColor
-      const red = 190 * percentage;
-      const green = 190 - 190 * percentage;
-
-      highlightColor = {
-        green,
-        red
-      };
+      const maxColor = 100;
+      hue = maxColor - maxColor * percentage;
 
       // Set hoverX state
       hoverX = event.offsetX;
 
+      let lowerThreshold = 0.25;
+      let upperThreshold = 0.75;
+
       // Calculate innertext
-      if (percentage <= 0.3) {
+      if (percentage <= lowerThreshold) {
         sliderInnerText = "That good eh?";
-      } else if (percentage > 0.3 && percentage < 0.7) {
+      } else if (percentage > lowerThreshold && percentage < upperThreshold) {
         sliderInnerText = "Not too good. Not too bad.";
       } else {
         sliderInnerText = "Woah. Bummer.";
@@ -150,8 +142,7 @@
     <input
       id="range"
       type="text"
-      style="--bg:rgb({highlightColor.red}, {highlightColor.green}, 0); --x:{hoverX}px;
-      --color:{Theme.colors.white}"
+      style="--bg:hsla({hue}, 56%, 55%, 1); --x:{hoverX}px; --color:{Theme.colors.white}"
       on:mousemove={handleMouseOver}
       on:focus={handleFocus}
       on:blur={handleBlur}

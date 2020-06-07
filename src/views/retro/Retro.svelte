@@ -111,6 +111,7 @@
     bottom: 0;
     background-color: var(--bgColor);
     background-position: center;
+    overflow-y: auto;
   }
   h1 {
     font-size: 40px;
@@ -136,7 +137,11 @@
 </style>
 
 <main style="--bgColor:{Theme.colors.white}">
-  <FlexContainer width="100%" direction="column" justifyContent="flex-start">
+  <FlexContainer
+    height="unset"
+    width="100%"
+    direction="column"
+    justifyContent="flex-start">
     <FlexContainer
       width="100%"
       alignItems="flex-start"
@@ -157,12 +162,7 @@
     <Slider OnSubmit={handleSubmit} />
     <div id="cardcontainer">
       {#each retroItemsArray as item}
-        <Card
-          text={item.itemText}
-          percent={item.percentage}
-          width={document
-            .getElementById('cardcontainer')
-            .getBoundingClientRect().width} />
+        <Card text={item.itemText} percent={item.percentage} />
       {/each}
     </div>
   </FlexContainer>
