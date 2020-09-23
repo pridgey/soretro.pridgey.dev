@@ -60,14 +60,17 @@
           const socketData = JSON.parse(event.data);
           if (socketData.id === sessionId) {
             // This relates to us
-            if (socketData.request === "initial" && retroItems.length > 0) {
+            if (
+              socketData.request === "initial" &&
+              retroItemsArray.length > 0
+            ) {
               // A client joined the session, send them what we have
               updateSession();
             } else {
               // Must be receiving information about our session
-              if (socketData.payload !== retroItems) {
+              if (socketData.payload !== retroItemsArray) {
                 // We have new stuff
-                retroItems = socketData.payload;
+                retroItemsArray = [...socketData.payload];
               }
             }
           }
@@ -99,6 +102,7 @@
 
   function handleSubmit(newRetroItem) {
     retroItemsArray = [...retroItemsArray, newRetroItem];
+    updateSession();
   }
 </script>
 
@@ -162,7 +166,14 @@
     <Slider OnSubmit={handleSubmit} />
     <div id="cardcontainer">
       {#each retroItemsArray as item}
-        <Card text={item.itemText} percent={item.percentage} />
+        <Card
+          text={item.itemText}
+          percent={item.percentage}
+          OnDelete={() => {
+            retroItemsArray.splice(retroItemsArray.indexOf(item), 1);
+            retroItemsArray = retroItemsArray;
+            updateSession();
+          }} />
       {/each}
     </div>
   </FlexContainer>

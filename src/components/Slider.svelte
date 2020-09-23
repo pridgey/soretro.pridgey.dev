@@ -143,6 +143,7 @@
       id="range"
       type="text"
       style="--bg:hsla({hue}, 56%, 55%, 1); --x:{hoverX}px; --color:{Theme.colors.white}"
+      autocomplete="off"
       on:mousemove={handleMouseOver}
       on:focus={handleFocus}
       on:blur={handleBlur}
