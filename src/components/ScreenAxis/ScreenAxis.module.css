@@ -1,0 +1,49 @@
+.axisLabel {
+  display: flex;
+  flex-direction: column;
+  font-family: "Doto", sans-serif;
+  font-size: 1.2em;
+  gap: 2px;
+  color: rgb(0, 214, 0);
+  user-select: none;
+}
+
+.axisLeft {
+  align-items: flex-start;
+  position: absolute;
+  top: 50%;
+  left: 1em;
+  transform: translateY(-50%);
+}
+
+.axisRight {
+  align-items: flex-end;
+  position: absolute;
+  top: 50%;
+  right: 1em;
+  transform: translateY(-50%);
+}
+
+.axisTop {
+  align-items: center;
+  position: absolute;
+  top: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.axisBottom {
+  align-items: center;
+  position: absolute;
+  bottom: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.axisMiddle {
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
