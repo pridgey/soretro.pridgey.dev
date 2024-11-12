@@ -1,11 +1,23 @@
-import { createSignal, For, type Component } from "solid-js";
+import { createEffect, createSignal, For, type Component } from "solid-js";
 import styles from "./App.module.css";
 import { AnalogButton } from "./components/AnalogButton";
 import { ScreenAxis } from "./components/ScreenAxis";
+import { BsMusicNoteBeamed } from "solid-icons/bs";
 
 const App: Component = () => {
   const [screenCursor, setScreenCursor] = createSignal({ x: 0, y: 0 });
   const [notes, updateNotes] = createSignal<any[]>([]);
+
+  const [musicPlay, setMusicPlay] = createSignal(false);
+  const lobbyMusic = new Audio("gingersweet by massobeats.mp3");
+
+  createEffect(() => {
+    if (musicPlay()) {
+      lobbyMusic.play();
+    } else {
+      lobbyMusic.pause();
+    }
+  });
 
   return (
     <div class={styles.background}>
@@ -60,7 +72,7 @@ const App: Component = () => {
                 "--note-x-right": `${note.x_right}`,
                 "--note-y-top": `${note.y_top}`,
                 "--note-y-bottom": `${note.y_bottom}`,
-                "--note-rotation": `${Math.random() * 30 - 15}deg`,
+                "--note-rotation": `${Math.random() * 20 - 10}deg`,
               }}
               onClick={(e) => {
                 e.preventDefault();
@@ -72,8 +84,12 @@ const App: Component = () => {
         </For>
       </div>
       <div class={styles.buttonBar}>
-        <AnalogButton> </AnalogButton>
-        <AnalogButton> </AnalogButton>
+        <AnalogButton
+          IndicatorLight={musicPlay()}
+          OnClick={() => setMusicPlay(!musicPlay())}
+        >
+          <BsMusicNoteBeamed />{" "}
+        </AnalogButton>
       </div>
     </div>
   );

@@ -11,7 +11,7 @@
 }
 
 .analogButton__content {
-  padding: 30px 40px;
+  padding: 16px 28px;
   border-radius: 8px;
   box-shadow: inset 0 -6px #d5d7de, 0 -2px #ffffff;
   transition: all 0.1s ease-in-out;
@@ -19,7 +19,9 @@
 
 .analogButton__text {
   color: #888;
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   transform: translate3d(0, -4px, 0);
   transition: all 0.1s ease-in-out;
 }
@@ -34,4 +36,12 @@
 
 .analogButton:active .analogButton__text {
   transform: translate3d(0, 0, 0);
+}
+
+.indicator {
+  width: 100%;
+  height: 6px;
+  border-radius: 8px;
+  background-color: var(--indicator-light);
+  box-shadow: var(--indicator-shadow);
 }
