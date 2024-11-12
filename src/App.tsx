@@ -10,6 +10,7 @@ const App: Component = () => {
 
   const [musicPlay, setMusicPlay] = createSignal(false);
   const lobbyMusic = new Audio("gingersweet by massobeats.mp3");
+  lobbyMusic.loop = true;
 
   createEffect(() => {
     if (musicPlay()) {
