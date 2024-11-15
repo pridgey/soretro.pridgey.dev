@@ -8,10 +8,16 @@ export type AnalogButtonProps = {
 };
 
 export const AnalogButton = (props: AnalogButtonProps) => {
+  const buttonClickSFX = new Audio("button-click.mp3");
+  buttonClickSFX.volume = 0.5;
+
   return (
     <button
       class={style.analogButton}
-      onClick={() => props.OnClick()}
+      onClick={() => {
+        buttonClickSFX.play();
+        props.OnClick();
+      }}
       role="button"
     >
       <div class={style.analogButton__content}>

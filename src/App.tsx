@@ -3,6 +3,7 @@ import styles from "./App.module.css";
 import { AnalogButton } from "./components/AnalogButton";
 import { ScreenAxis } from "./components/ScreenAxis";
 import { BsMusicNoteBeamed } from "solid-icons/bs";
+import { RetroNote } from "./components/RetroNote";
 
 const App: Component = () => {
   const [screenCursor, setScreenCursor] = createSignal({ x: 0, y: 0 });
@@ -38,22 +39,15 @@ const App: Component = () => {
           const glassRect = e.currentTarget.getBoundingClientRect();
           const x = e.clientX - glassRect.left;
           const y = e.clientY - glassRect.top;
-          let x_left = "unset";
-          let x_right = "unset";
-          let y_top = "unset";
-          let y_bottom = "unset";
+          let vertical = "top";
+          let horizontal = "left";
           if (x > glassRect.width / 2) {
-            x_right = `${glassRect.right - e.clientX}px`;
-          } else {
-            x_left = `${x}px`;
+            horizontal = "right";
           }
           if (y > glassRect.height / 2) {
-            y_bottom = `${glassRect.bottom - e.clientY}px`;
-          } else {
-            y_top = `${y}px`;
+            vertical = "bottom";
           }
-          console.log("Note", { x_left, x_right, y_top, y_bottom, x, y });
-          updateNotes([...notes(), { x_left, x_right, y_top, y_bottom, x, y }]);
+          updateNotes([...notes(), { x, y, vertical, horizontal }]);
         }}
       >
         <ScreenAxis />
@@ -66,28 +60,22 @@ const App: Component = () => {
         ></div>
         <For each={notes()}>
           {(note) => (
-            <div
-              class={styles.note}
-              style={{
-                "--note-x-left": `${note.x_left}`,
-                "--note-x-right": `${note.x_right}`,
-                "--note-y-top": `${note.y_top}`,
-                "--note-y-bottom": `${note.y_bottom}`,
-                "--note-rotation": `${Math.random() * 20 - 10}deg`,
+            <RetroNote
+              Anchor={{
+                Vertical: note.vertical,
+                Horizontal: note.horizontal,
               }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log("Note Click", note);
-              }}
-            ></div>
+              Position={{ x: note.x, y: note.y }}
+            />
           )}
         </For>
       </div>
       <div class={styles.buttonBar}>
         <AnalogButton
           IndicatorLight={musicPlay()}
-          OnClick={() => setMusicPlay(!musicPlay())}
+          OnClick={() => {
+            setMusicPlay(!musicPlay());
+          }}
         >
           <BsMusicNoteBeamed />{" "}
         </AnalogButton>
