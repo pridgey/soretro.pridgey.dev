@@ -2,6 +2,7 @@ import { RiCommunicationChat1Fill } from "solid-icons/ri";
 import { RiDesignEditCircleLine } from "solid-icons/ri";
 import styles from "./RetroNote.module.css";
 import { RetroStickerSVG, SideIndicatorSVG } from "../SVG";
+import { createSignal, Show } from "solid-js";
 
 const ROTATION_MIN = -15;
 const ROTATION_MAX = 15;
@@ -12,9 +13,12 @@ export type RetroNoteProps = {
 };
 
 export const RetroNote = (props: RetroNoteProps) => {
+  const [showCard, setShowCard] = createSignal(false);
+
   return (
     <div
       class={styles.sticker}
+      onBlur={() => setShowCard(false)}
       style={{
         "--position-x": props.Position.x + "px",
         "--position-y": props.Position.y + "px",
@@ -25,8 +29,28 @@ export const RetroNote = (props: RetroNoteProps) => {
           Math.random() * (ROTATION_MAX - ROTATION_MIN) + ROTATION_MIN
         }deg)`,
       }}
+      tabIndex={-1}
     >
-      <RetroStickerSVG class={styles.icon} />
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowCard(!showCard());
+        }}
+      >
+        <RetroStickerSVG class={styles.icon} />
+      </div>
+      <Show when={showCard()}>
+        <div
+          classList={{
+            [styles.card]: true,
+            [styles.cardBottom]: props.Anchor.Vertical === "bottom",
+            [styles.cardRight]: props.Anchor.Horizontal === "right",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div contentEditable={true}>Testing</div>
+        </div>
+      </Show>
     </div>
   );
 };
