@@ -1,30 +1,27 @@
-import { RiCommunicationChat1Fill } from "solid-icons/ri";
-import { RiDesignEditCircleLine } from "solid-icons/ri";
 import styles from "./RetroNote.module.css";
-import { RetroStickerSVG, SideIndicatorSVG } from "../SVG";
-import { createSignal, Show } from "solid-js";
+import { RetroStickerSVG } from "../SVG";
+import { NoteRecord } from "../../types/NoteRecord";
+import Pocketbase from "pocketbase";
 
 const ROTATION_MIN = -15;
 const ROTATION_MAX = 15;
 
 export type RetroNoteProps = {
-  Anchor: { Vertical: "top" | "bottom"; Horizontal: "left" | "right" };
-  Position: { x: number; y: number };
+  note: NoteRecord;
 };
 
 export const RetroNote = (props: RetroNoteProps) => {
-  const [showCard, setShowCard] = createSignal(false);
+  const pb = new Pocketbase(import.meta.env.VITE_POCKETBASE_URL);
 
   return (
     <div
       class={styles.sticker}
-      onBlur={() => setShowCard(false)}
       style={{
-        "--position-x": props.Position.x + "px",
-        "--position-y": props.Position.y + "px",
+        "--position-x": props.note.x + "px",
+        "--position-y": props.note.y + "px",
         "--translate": `translate(${
-          props.Anchor.Horizontal === "left" ? "0%" : "-100%"
-        }, ${props.Anchor.Vertical === "top" ? "0%" : "-100%"})`,
+          props.note.horizontal === "left" ? "0%" : "-100%"
+        }, ${props.note.vertical === "top" ? "0%" : "-100%"})`,
         "--sticker-rotate": `rotate(${
           Math.random() * (ROTATION_MAX - ROTATION_MIN) + ROTATION_MIN
         }deg)`,
@@ -34,23 +31,32 @@ export const RetroNote = (props: RetroNoteProps) => {
       <div
         onClick={(e) => {
           e.stopPropagation();
-          setShowCard(!showCard());
         }}
       >
         <RetroStickerSVG class={styles.icon} />
       </div>
-      <Show when={showCard()}>
-        <div
-          classList={{
-            [styles.card]: true,
-            [styles.cardBottom]: props.Anchor.Vertical === "bottom",
-            [styles.cardRight]: props.Anchor.Horizontal === "right",
+      <div
+        classList={{
+          [styles.card]: true,
+          [styles.cardBottom]: props.note.vertical === "bottom",
+          [styles.cardRight]: props.note.horizontal === "right",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <textarea
+          class={styles.textarea}
+          onChange={async (e) => {
+            await pb
+              .collection<NoteRecord>("note")
+              .update(props.note.id ?? "-1", {
+                ...props.note,
+                note: e.currentTarget.value,
+              });
           }}
-          onClick={(e) => e.stopPropagation()}
         >
-          <div contentEditable={true}>Testing</div>
-        </div>
-      </Show>
+          {props.note.note}
+        </textarea>
+      </div>
     </div>
   );
 };

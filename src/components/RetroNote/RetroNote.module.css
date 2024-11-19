@@ -19,12 +19,15 @@
 .card {
   background-color: white;
   border-radius: 12px;
-  height: 150px;
+  display: none;
   left: 70px;
   padding: 12px;
   position: absolute;
   top: 0px;
-  width: 300px;
+}
+
+.sticker:focus-within .card {
+  display: block;
 }
 
 .cardBottom {
@@ -35,4 +38,10 @@
 .cardRight {
   left: unset;
   right: 70px;
+}
+
+.textarea {
+  min-height: 100px;
+  min-width: 200px;
+  overflow: auto;
 }
